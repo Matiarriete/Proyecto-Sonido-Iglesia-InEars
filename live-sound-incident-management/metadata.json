@@ -1,0 +1,5 @@
+{
+  "name": "Live Sound Incident Management",
+  "description": "A real-time ticketing system for performers to communicate sound issues to technicians during live events. This system replaces verbal or hand-signal communication with a silent, efficient digital interface, ensuring clear and organized incident resolution.",
+  "requestFramePermissions": []
+}
