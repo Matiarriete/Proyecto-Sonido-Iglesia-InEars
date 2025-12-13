@@ -13,17 +13,13 @@ Requisitos
 - Python 3.10+ (recomendado) o 3.11/3.12/3.13
 - Dependencias (instalar con pip):
 
-```bash
-pip install fastapi uvicorn sqlalchemy pydantic
-```
-
 Instalación rápida
 
 ```bash
 cd /ruta/al/proyecto/Proyecto_sonido_iglesia
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt  # si creas requirements.txt, o instalar manualmente
+pip install fastapi uvicorn sqlalchemy pydantic
 ```
 
 Ejecutar la API
