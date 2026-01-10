@@ -1,7 +1,8 @@
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { Ticket, Instrument, TicketStatus, User, UserRole } from '../types';
 
-const BASE_URL = 'https://appauma-nontheological-conception.ngrok-free.dev';
+// const BASE_URL = 'https://appauma-nontheological-conception.ngrok-free.dev';
+const BASE_URL = 'http://127.0.0.1:8000';
 const API_URLS = {
   instruments: `${BASE_URL}/instruments/`,
   tickets: `${BASE_URL}/tickets/`,
@@ -53,7 +54,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
       fetchInstruments();
       fetchTickets();
       fetchUsers();
-    }, 5000);
+    }, 10000);
 
     // 3. IMPORTANTE: Limpiar el intervalo cuando el componente se desmonte
     return () => clearInterval(interval);

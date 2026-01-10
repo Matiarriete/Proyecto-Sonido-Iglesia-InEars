@@ -14,8 +14,8 @@ class TicketBase(BaseModel):
   performerId: str
   performerName: str
   problem: str
-  instrumentId: str
-  instrumentName: str
+  instrumentId: Optional[str] = None
+  instrumentName: Optional[str] = None
   status: str
   createdAt: int
   updatedAt: int
@@ -56,8 +56,8 @@ class DBTicket(Base):
   performerId = Column(String)
   performerName = Column(String)
   problem = Column(String)
-  instrumentId = Column(String)
-  instrumentName = Column(String)
+  instrumentId = Column(String, nullable=True)
+  instrumentName = Column(String, nullable=True)
   status = Column(String) 
   createdAt = Column(Integer)
   updatedAt = Column(Integer)
