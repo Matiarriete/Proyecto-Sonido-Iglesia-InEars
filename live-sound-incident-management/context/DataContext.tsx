@@ -1,7 +1,7 @@
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
 import { Ticket, Instrument, TicketStatus, User, UserRole } from '../types';
 
-const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = 'https://appauma-nontheological-conception.ngrok-free.dev';
 const API_URLS = {
   instruments: `${BASE_URL}/instruments/`,
   tickets: `${BASE_URL}/tickets/`,
@@ -45,73 +45,83 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
   useEffect(() => {
 
-    const fetchInstruments = async () => {
-      try {
-        const instResponse = await fetch(API_URLS.instruments);
-
-        if (!instResponse.ok) {
-          throw new Error(`Error HTTP: ${instResponse.status}`);
-        }
-
-        const result = await instResponse.json();
-
-        const instrumentsFromApi: Instrument[] = Array.isArray(result.data) ? result.data : [];
-
-        setInstruments(instrumentsFromApi);
-
-      } catch (error) {
-        console.error("Error al cargar instrumentos desde la API:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    const fetchTickets = async () => {
-      try {
-        const ticketResponse = await fetch(API_URLS.tickets);
-
-        if (!ticketResponse.ok) {
-          throw new Error(`Error HTTP: ${ticketResponse.status}`);
-        }
-
-        const result = await ticketResponse.json();
-
-        const ticketsFromApi: Ticket[] = Array.isArray(result.data) ? result.data : [];
-
-        setTickets(ticketsFromApi);
-
-      } catch (error) {
-        console.error("Error al cargar tickets desde la API:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-const fetchUsers = async () => {
-      try {
-        const userResponse = await fetch(API_URLS.users);
-
-        if (!userResponse.ok) {
-          throw new Error(`Error HTTP: ${userResponse.status}`);
-        }
-
-        const result = await userResponse.json();
-
-        const usersFromApi: User[] = Array.isArray(result.data) ? result.data : [];
-
-        setUsers(usersFromApi);
-
-      } catch (error) {
-        console.error("Error al cargar usuarios desde la API:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchInstruments();
     fetchTickets();
     fetchUsers();
+
+    const interval = setInterval(() => {
+      fetchInstruments();
+      fetchTickets();
+      fetchUsers();
+    }, 5000);
+
+    // 3. IMPORTANTE: Limpiar el intervalo cuando el componente se desmonte
+    return () => clearInterval(interval);
   }, []);
+
+
+  const fetchInstruments = async () => {
+    try {
+      const instResponse = await fetch(API_URLS.instruments);
+
+      if (!instResponse.ok) {
+        throw new Error(`Error HTTP: ${instResponse.status}`);
+      }
+
+      const result = await instResponse.json();
+
+      const instrumentsFromApi: Instrument[] = Array.isArray(result.data) ? result.data : [];
+
+      setInstruments(instrumentsFromApi);
+
+    } catch (error) {
+      console.error("Error al cargar instrumentos desde la API:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchTickets = async () => {
+    try {
+      const ticketResponse = await fetch(API_URLS.tickets);
+
+      if (!ticketResponse.ok) {
+        throw new Error(`Error HTTP: ${ticketResponse.status}`);
+      }
+
+      const result = await ticketResponse.json();
+
+      const ticketsFromApi: Ticket[] = Array.isArray(result.data) ? result.data : [];
+
+      setTickets(ticketsFromApi);
+
+    } catch (error) {
+      console.error("Error al cargar tickets desde la API:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      const userResponse = await fetch(API_URLS.users);
+
+      if (!userResponse.ok) {
+        throw new Error(`Error HTTP: ${userResponse.status}`);
+      }
+
+      const result = await userResponse.json();
+
+      const usersFromApi: User[] = Array.isArray(result.data) ? result.data : [];
+
+      setUsers(usersFromApi);
+
+    } catch (error) {
+      console.error("Error al cargar usuarios desde la API:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const createTicket = async (performer: User, problem: string, instrument?: Instrument) => {
     const newTicket: Ticket = {
@@ -294,7 +304,7 @@ const fetchUsers = async () => {
   };
 
   return (
-    <DataContext.Provider value={{ users, tickets, instruments, isLoading, createTicket, updateTicketStatus,updateTicketAssignedTo, addInstrument, updateInstrument, addUser, updateUser }}>
+    <DataContext.Provider value={{ users, tickets, instruments, isLoading, createTicket, updateTicketStatus, updateTicketAssignedTo, addInstrument, updateInstrument, addUser, updateUser }}>
       {children}
     </DataContext.Provider>
   );
