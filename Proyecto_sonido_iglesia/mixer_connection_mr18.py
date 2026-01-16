@@ -1,8 +1,9 @@
 from pythonosc import udp_client
 import time, threading,struct,socket
 from typing import Dict
+from config import settings
 
-MR18_IP = config.MIXER_IP
+MR18_IP = settings.MIXER_IP
 MR18_PORT = 10024
 
 client = udp_client.SimpleUDPClient(MR18_IP, MR18_PORT)

@@ -1,7 +1,8 @@
-import os
+from pydantic_settings import BaseSettings
 
-# --- Configuración de la Consola X32/X18 ---
-# Si la variable de entorno X32_IP no existe, la aplicación fallará al inicio (None)
-MIXER_IP: str
+class Settings:
+    MIXER_IP: str = "0.0.0.0"
+    DATABASE_URL: str = "sqlite:///./app.db"
 
-DATABASE_URL = "sqlite:///./app.db" 
+# Instanciamos un objeto único (Singleton) que será compartido
+settings = Settings()
