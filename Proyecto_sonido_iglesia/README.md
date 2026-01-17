@@ -19,7 +19,7 @@ Instalación rápida
 cd /ruta/al/proyecto/Proyecto_sonido_iglesia
 python3 -m venv .venv
 source .venv/bin/activate
-pip install fastapi uvicorn sqlalchemy pydantic
+pip install fastapi uvicorn sqlalchemy pydantic pydantic-settings
 ```
 
 Ejecutar la API

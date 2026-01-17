@@ -4,8 +4,9 @@ import TicketInbox from './TicketInbox';
 import TicketHistory from './TicketHistory';
 import InstrumentManager from './InstrumentManager';
 import UserManager from './UserManager';
+import MixerManager from './MixerManager';
 
-type Tab = 'inbox' | 'history' | 'instruments' | 'users';
+type Tab = 'inbox' | 'history' | 'instruments' | 'users' | 'mixer' ;
 
 const TecnicoDashboard: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('inbox');
@@ -20,6 +21,8 @@ const TecnicoDashboard: React.FC = () => {
         return <InstrumentManager />;
       case 'users':
         return <UserManager />;
+      case 'mixer':
+        return <MixerManager />
       default:
         return null;
     }
@@ -43,6 +46,7 @@ const TecnicoDashboard: React.FC = () => {
           <TabButton tab="history" label="History" />
           <TabButton tab="instruments" label="Instruments" />
           <TabButton tab="users" label="Users" />
+          <TabButton tab="mixer" label="Mixer" />
         </nav>
       </div>
       <div className="mt-6">
