@@ -14,6 +14,7 @@ interface DataContextType {
   tickets: Ticket[];
   instruments: Instrument[];
   users: User[];
+  mixerIp: string,
   isLoading: boolean;
   createTicket: (performer: User, problem: string, instrument?: Instrument) => void;
   updateTicketStatus: (ticketId: string, status: TicketStatus) => void;
@@ -26,6 +27,7 @@ const defaultContextValue: DataContextType = {
   tickets: [],
   instruments: [],
   users: [],
+  mixerIp: "",
   isLoading: true,
   createTicket: () => { },
   updateTicketStatus: () => { },
@@ -43,6 +45,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [instruments, setInstruments] = useState<Instrument[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [mixerIp, setMixerIp] = useState<String>("")
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -50,6 +53,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     fetchInstruments();
     fetchTickets();
     fetchUsers();
+    fetchMixerIP();
 
     const intervalInsUsers = setInterval(() => {
       fetchInstruments();
@@ -138,7 +142,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       const result = await mixerResponse.json();
 
-      setUsers(result);
+      setMixerIp(result.mixer_ip);
 
     } catch (error) {
       console.error("Error al cargar usuarios desde la API:", error);
@@ -330,7 +334,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   };
 
   return (
-    <DataContext.Provider value={{ users, tickets, instruments, isLoading, createTicket, updateTicketStatus, updateTicketAssignedTo, addInstrument, updateInstrument, addUser, updateUser, fetchMixerIP }}>
+    <DataContext.Provider value={{ users, tickets, instruments, mixerIp, isLoading, createTicket, updateTicketStatus, updateTicketAssignedTo, addInstrument, updateInstrument, addUser, updateUser }}>
       {children}
     </DataContext.Provider>
   );
