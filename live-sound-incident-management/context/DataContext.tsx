@@ -333,8 +333,28 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     );
   };
 
+  const updateMixerIp = async (mixer_id: string) => {
+
+    const mixer_ip_body = {
+      "new_ip": mixer_id
+    }
+
+    const response = await fetch(`${API_URLS.mixer}ip`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(mixer_ip_body),
+    });
+    if (!response.ok) {
+      throw new Error('Error al actualizar el mixer_ip: ' + response.status);
+    } else {
+      console.log('Mixer actualizado en la API con éxito');
+    }
+  };
+
   return (
-    <DataContext.Provider value={{ users, tickets, instruments, mixerIp, isLoading, createTicket, updateTicketStatus, updateTicketAssignedTo, addInstrument, updateInstrument, addUser, updateUser }}>
+    <DataContext.Provider value={{ users, tickets, instruments, mixerIp, isLoading, createTicket, updateTicketStatus, updateTicketAssignedTo, addInstrument, updateInstrument, addUser, updateUser, updateMixerIp }}>
       {children}
     </DataContext.Provider>
   );

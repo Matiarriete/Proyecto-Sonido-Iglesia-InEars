@@ -3,17 +3,18 @@ import { useDataContext } from '../../hooks/useData';
 
 const MixerManager: React.FC = () => {
 
-    const { mixerIp } = useDataContext();
+    const { mixerIp, updateMixerIp } = useDataContext();
     const [enableBtn, setEnableBtn] = useState(true);
     const [newMixerIp, setNewMixerIp] = useState(mixerIp)
 
 
     const handleModifyMixerIpBtn = () => {
-        setEnableBtn(!enableBtn)
+        setEnableBtn(false)
     }
 
     const handleUpdateMixerIp = () => {
-        
+        updateMixerIp(newMixerIp)
+        setEnableBtn(true)
     }
 
     return(
@@ -28,7 +29,9 @@ const MixerManager: React.FC = () => {
                         placeholder={newMixerIp}
                         className="flex-grow bg-gray-800 text-white p-2 rounded-l-md focus:outline-none focus:ring-2 focus:ring-brand-primary"
                     />
-                    <button onClick={enableBtn ? handleModifyMixerIpBtn : handleUpdateMixerIp} className="bg-brand-primary text-white font-bold py-2 px-4 rounded-r-md hover:bg-blue-600 transition-colors">
+                    <button 
+                        onClick={enableBtn ? handleModifyMixerIpBtn : handleUpdateMixerIp} 
+                        className={enableBtn ? "bg-brand-primary text-white font-bold py-2 px-4 rounded-r-md hover:bg-blue-600 transition-colors" : "bg-brand-success text-white font-bold py-2 px-4 rounded-r-md hover:bg-green-600 transition-colors"}>
                         {enableBtn ? "Modificar Ip" : "Aceptar"}
                     </button>
                 </div>
