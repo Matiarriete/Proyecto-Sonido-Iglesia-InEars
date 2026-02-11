@@ -1,5 +1,5 @@
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
-import { Ticket, Instrument, TicketStatus, User, UserRole } from '../types';
+import { Ticket, Instrument, TicketStatus, User, UserRole, Mixer } from '../types';
 
 // const BASE_URL = 'https://appauma-nontheological-conception.ngrok-free.dev';
 const BASE_URL = 'http://127.0.0.1:8000';
@@ -14,7 +14,7 @@ interface DataContextType {
   tickets: Ticket[];
   instruments: Instrument[];
   users: User[];
-  mixerIp: string,
+  mixer: Mixer,
   isLoading: boolean;
   createTicket: (performer: User, problem: string, instrument?: Instrument) => void;
   updateTicketStatus: (ticketId: string, status: TicketStatus) => void;
@@ -27,7 +27,7 @@ const defaultContextValue: DataContextType = {
   tickets: [],
   instruments: [],
   users: [],
-  mixerIp: "",
+  mixer: null,
   isLoading: true,
   createTicket: () => { },
   updateTicketStatus: () => { },
@@ -45,7 +45,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [instruments, setInstruments] = useState<Instrument[]>([]);
   const [users, setUsers] = useState<User[]>([]);
-  const [mixerIp, setMixerIp] = useState<String>("")
+  const [mixer, setMixer] = useState<Mixer>()
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     fetchInstruments();
     fetchTickets();
     fetchUsers();
-    fetchMixerIP();
+    fetchMixer();
 
     const intervalInsUsers = setInterval(() => {
       fetchInstruments();
@@ -131,10 +131,9 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   };
 
-  const fetchMixerIP = async () => {
+  const fetchMixer = async () => {
     try {
-      const mixerResponse = await fetch(API_URLS.mixer + "ip/"
-      );
+      const mixerResponse = await fetch(API_URLS.mixer);
 
       if (!mixerResponse.ok) {
         throw new Error(`Error HTTP: ${mixerResponse.status}`);
@@ -142,7 +141,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
 
       const result = await mixerResponse.json();
 
-      setMixerIp(result.mixer_ip);
+      setMixer(result);
 
     } catch (error) {
       console.error("Error al cargar usuarios desde la API:", error);
@@ -333,28 +332,25 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     );
   };
 
-  const updateMixerIp = async (mixer_id: string) => {
+  const updateMixer = async (mixer: Mixer) => {
 
-    const mixer_ip_body = {
-      "new_ip": mixer_id
-    }
-
-    const response = await fetch(`${API_URLS.mixer}ip`, {
+    const response = await fetch(`${API_URLS.mixer}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(mixer_ip_body),
+      body: JSON.stringify(mixer),
     });
     if (!response.ok) {
       throw new Error('Error al actualizar el mixer_ip: ' + response.status);
     } else {
+      setMixer(mixer);
       console.log('Mixer actualizado en la API con éxito');
     }
   };
 
   return (
-    <DataContext.Provider value={{ users, tickets, instruments, mixerIp, isLoading, createTicket, updateTicketStatus, updateTicketAssignedTo, addInstrument, updateInstrument, addUser, updateUser, updateMixerIp }}>
+    <DataContext.Provider value={{ users, tickets, instruments, mixer, isLoading, createTicket, updateTicketStatus, updateTicketAssignedTo, addInstrument, updateInstrument, addUser, updateUser, updateMixer }}>
       {children}
     </DataContext.Provider>
   );

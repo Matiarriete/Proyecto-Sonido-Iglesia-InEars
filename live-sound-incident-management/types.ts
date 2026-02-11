@@ -38,6 +38,11 @@ export interface User{
   role: UserRole;
 }
 
+export interface Mixer{
+  ip: string;
+  port: number;
+}
+
 export interface PredefinedProblem {
   label: string;
   type: 'generic' | 'instrument';

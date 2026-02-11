@@ -2,21 +2,20 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from config import settings
+from typing import Optional
 
 router = APIRouter(prefix="/mixer",tags=["Mixer Control"])
 
 class IPUpdate(BaseModel):
-    new_ip: str
+    ip: Optional[str] = settings.MIXER_IP
+    port: Optional[int] = settings.MIXER_PORT
 
-@router.get("/ip")
-async def get_mixer_ip():
-    """Retorna la IP configurada actualmente."""
-    return {"mixer_ip": settings.MIXER_IP}
+@router.get("/")
+async def get_mixer_config():
+    return {"ip": settings.MIXER_IP, "port": settings.MIXER_PORT}
 
-@router.patch("/ip")
+@router.patch("/")
 async def update_mixer_ip(data: IPUpdate):
-    if not data.new_ip:
-        raise HTTPException(status_code=400, detail="La IP no puede estar vacía")
-    
-    settings.MIXER_IP = data.new_ip
-    return {"message": "Configuración actualizada", "current_ip": settings.MIXER_IP}
+    settings.MIXER_IP = data.ip
+    settings.MIXER_PORT = data.port
+    return {"message": "Configuración actualizada", "current_ip": settings.MIXER_IP, "current_port": settings.MIXER_PORT}
