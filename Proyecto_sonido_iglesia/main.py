@@ -1,9 +1,12 @@
 from fastapi.middleware.cors import CORSMiddleware
 from db import engine, Base
 from fastapi import FastAPI
+import config
+import sys
 from endpoints.tickets import router as ticket_router
 from endpoints.instruments import router as instrument_router
 from endpoints.users import router as user_router
+from endpoints.mixer import router as mixer_router
 
 app = FastAPI()
 app.add_middleware(
@@ -18,6 +21,4 @@ Base.metadata.create_all(bind=engine)
 app.include_router(instrument_router)
 app.include_router(ticket_router)
 app.include_router(user_router)
-
-
-
+app.include_router(mixer_router)

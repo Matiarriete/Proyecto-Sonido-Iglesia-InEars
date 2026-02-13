@@ -1,17 +1,20 @@
 import React, { createContext, useState, ReactNode, useEffect } from 'react';
-import { Ticket, Instrument, TicketStatus, User, UserRole } from '../types';
+import { Ticket, Instrument, TicketStatus, User, UserRole, Mixer } from '../types';
 
-const BASE_URL = 'https://appauma-nontheological-conception.ngrok-free.dev';
+// const BASE_URL = 'https://appauma-nontheological-conception.ngrok-free.dev';
+const BASE_URL = 'http://127.0.0.1:8000';
 const API_URLS = {
   instruments: `${BASE_URL}/instruments/`,
   tickets: `${BASE_URL}/tickets/`,
   users: `${BASE_URL}/users/`,
+  mixer: `${BASE_URL}/mixer/`,
 };
 
 interface DataContextType {
   tickets: Ticket[];
   instruments: Instrument[];
   users: User[];
+  mixer: Mixer,
   isLoading: boolean;
   createTicket: (performer: User, problem: string, instrument?: Instrument) => void;
   updateTicketStatus: (ticketId: string, status: TicketStatus) => void;
@@ -24,6 +27,7 @@ const defaultContextValue: DataContextType = {
   tickets: [],
   instruments: [],
   users: [],
+  mixer: null,
   isLoading: true,
   createTicket: () => { },
   updateTicketStatus: () => { },
@@ -41,6 +45,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [instruments, setInstruments] = useState<Instrument[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [mixer, setMixer] = useState<Mixer>()
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -48,18 +53,21 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     fetchInstruments();
     fetchTickets();
     fetchUsers();
+    fetchMixer();
 
-    const interval = setInterval(() => {
+    const intervalInsUsers = setInterval(() => {
       fetchInstruments();
-      fetchTickets();
       fetchUsers();
-    }, 5000);
+    }, 60000);
 
-    // 3. IMPORTANTE: Limpiar el intervalo cuando el componente se desmonte
-    return () => clearInterval(interval);
+    const intervalTickets = setInterval(() => {
+      fetchTickets();
+    }, 10000);
+
+    return () => {clearInterval(intervalTickets); clearInterval(intervalInsUsers)};
   }, []);
 
-
+  // GETS - FETCH
   const fetchInstruments = async () => {
     try {
       const instResponse = await fetch(API_URLS.instruments);
@@ -123,6 +131,26 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     }
   };
 
+  const fetchMixer = async () => {
+    try {
+      const mixerResponse = await fetch(API_URLS.mixer);
+
+      if (!mixerResponse.ok) {
+        throw new Error(`Error HTTP: ${mixerResponse.status}`);
+      }
+
+      const result = await mixerResponse.json();
+
+      setMixer(result);
+
+    } catch (error) {
+      console.error("Error al cargar usuarios desde la API:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  //ADD - CREATE
   const createTicket = async (performer: User, problem: string, instrument?: Instrument) => {
     const newTicket: Ticket = {
       id: `ticket-${Date.now()}`,
@@ -152,32 +180,54 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     setTickets(prevTickets => [newTicket, ...prevTickets]);
   };
 
-  const updateTicketStatus = async (ticketId: string, status: TicketStatus) => {
+  const addInstrument = async (name: string) => {
+    const newInstrument: Instrument = {
+      id: `inst-${Date.now()}`,
+      name,
+      isActive: true,
+    };
 
-    const ticketToUpdate = tickets.find(t => t.id === ticketId);
-    ticketToUpdate.status = status;
-    ticketToUpdate.updatedAt = Date.now();
-
-    const response = await fetch(`${API_URLS.tickets}${ticketId}`, {
-      method: 'PUT',
+    const response = await fetch(`${API_URLS.instruments}`, {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(ticketToUpdate),
+      body: JSON.stringify(newInstrument),
     });
     if (!response.ok) {
-      throw new Error('Error al actualizar el estado del ticket: ' + response.status);
+      throw new Error('Error al crear el instrumento: ' + response.status);
     } else {
-      console.log('Estado del ticket actualizado en la API con éxito');
+      console.log('Instrumento creado en la API con éxito');
     }
 
-    setTickets(prevTickets =>
-      prevTickets.map(ticket =>
-        ticket.id === ticketId ? ticketToUpdate : ticket
-      )
-    );
+    setInstruments(prev => [...prev, newInstrument]);
   };
 
+  const addUser = async (name: string) => {
+    const newUser: User = {
+      id: `user-${Date.now()}`,
+      name,
+      isActive: true,
+      role: UserRole.INTERPRETE,
+    };
+
+    const response = await fetch(`${API_URLS.users}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(newUser),
+    });
+    if (!response.ok) {
+      throw new Error('Error al crear el usuario: ' + response.status);
+    } else {
+      console.log('Usuario creado en la API con éxito');
+    }
+
+    setUsers(prev => [...prev, newUser]);
+  };
+
+  //UPDATE
   const updateTicketAssignedTo = async (ticketId: string, assignedTo: String) => {
 
     const ticketToUpdate = tickets.find(t => t.id === ticketId);
@@ -204,27 +254,30 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     );
   };
 
-  const addInstrument = async (name: string) => {
-    const newInstrument: Instrument = {
-      id: `inst-${Date.now()}`,
-      name,
-      isActive: true,
-    };
+  const updateTicketStatus = async (ticketId: string, status: TicketStatus) => {
 
-    const response = await fetch(`${API_URLS.instruments}`, {
-      method: 'POST',
+    const ticketToUpdate = tickets.find(t => t.id === ticketId);
+    ticketToUpdate.status = status;
+    ticketToUpdate.updatedAt = Date.now();
+
+    const response = await fetch(`${API_URLS.tickets}${ticketId}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(newInstrument),
+      body: JSON.stringify(ticketToUpdate),
     });
     if (!response.ok) {
-      throw new Error('Error al crear el instrumento: ' + response.status);
+      throw new Error('Error al actualizar el estado del ticket: ' + response.status);
     } else {
-      console.log('Instrumento creado en la API con éxito');
+      console.log('Estado del ticket actualizado en la API con éxito');
     }
 
-    setInstruments(prev => [...prev, newInstrument]);
+    setTickets(prevTickets =>
+      prevTickets.map(ticket =>
+        ticket.id === ticketId ? ticketToUpdate : ticket
+      )
+    );
   };
 
   const updateInstrument = async (id: string, name: string, isActive: boolean) => {
@@ -250,30 +303,6 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     setInstruments(prev =>
       prev.map(inst => (inst.id === id ? { ...inst, name, isActive } : inst))
     );
-  };
-
-  const addUser = async (name: string) => {
-    const newUser: User = {
-      id: `user-${Date.now()}`,
-      name,
-      isActive: true,
-      role: UserRole.INTERPRETE,
-    };
-
-    const response = await fetch(`${API_URLS.users}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newUser),
-    });
-    if (!response.ok) {
-      throw new Error('Error al crear el usuario: ' + response.status);
-    } else {
-      console.log('Usuario creado en la API con éxito');
-    }
-
-    setUsers(prev => [...prev, newUser]);
   };
 
   const updateUser = async (id: string, name: string, isActive: boolean, role: UserRole, instrumentId: String, instrumentName: String) => {
@@ -303,8 +332,25 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children }) => {
     );
   };
 
+  const updateMixer = async (mixer: Mixer) => {
+
+    const response = await fetch(`${API_URLS.mixer}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(mixer),
+    });
+    if (!response.ok) {
+      throw new Error('Error al actualizar el mixer_ip: ' + response.status);
+    } else {
+      setMixer(mixer);
+      console.log('Mixer actualizado en la API con éxito');
+    }
+  };
+
   return (
-    <DataContext.Provider value={{ users, tickets, instruments, isLoading, createTicket, updateTicketStatus, updateTicketAssignedTo, addInstrument, updateInstrument, addUser, updateUser }}>
+    <DataContext.Provider value={{ users, tickets, instruments, mixer, isLoading, createTicket, updateTicketStatus, updateTicketAssignedTo, addInstrument, updateInstrument, addUser, updateUser, updateMixer }}>
       {children}
     </DataContext.Provider>
   );

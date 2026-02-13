@@ -1,15 +1,12 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
-
-# 1. URL de la Base de Datos
-# El nombre del archivo de la base de datos es './app.db'
-DATABASE_URL = "sqlite:///./app.db" 
+from config import settings
 
 # 2. Crear el Motor
 # 'check_same_thread': False es necesario para SQLite en FastAPI 
 # ya que múltiples hilos podrían acceder a la base de datos
 engine = create_engine(
-    DATABASE_URL,
+    settings.DATABASE_URL,
     connect_args={"check_same_thread": False}
 )
 
